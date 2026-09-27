@@ -1,0 +1,46 @@
+# .NET
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+
+# IDE
+.vscode/
+.idea/
+
+# Local AI workspace and disposable upstream references
+AGENTS.md
+!templates/AGENTS.md
+docs/*
+!docs/images/
+_references/
+.codemap/
+.agents/
+.codex/
+.claude/
+.cursor/
+.continue/
+.windsurf/
+.gemini/
+.opencode/
+.aider*
+CLAUDE.md
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+settings.json
+store.json
+
+# Logs and OS files
+*.log
+*.dump
+*.har
+*.pcap
+*.pcapng
+.DS_Store
+Thumbs.db

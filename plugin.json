@@ -1,0 +1,12 @@
+{
+  "id": "mediasession",
+  "name": "Media Session",
+  "version": "0.1.0",
+  "sdkVersion": "1.26.0",
+  "iconFile": "icon.png",
+  "entryAssembly": "LoupixDeck.Plugin.MediaSession.dll",
+  "platform": "Windows",
+  "author": "Vencite",
+  "description": "Show and control the current Windows media session from LoupixDeck.",
+  "projectUrl": "https://github.com/Vencite/LoupixDeck.Plugin.MediaSession"
+}
