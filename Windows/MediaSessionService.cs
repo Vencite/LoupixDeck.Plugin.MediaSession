@@ -22,9 +22,6 @@ internal sealed class MediaSessionService : IDisposable
     private int _refreshRunning;
     private int _refreshPending;
     private long _refreshRevision;
-    private GlobalSystemMediaTransportControlsSession? _artworkRetrySession;
-    private MediaSnapshot? _artworkRetryMetadata;
-    private int _artworkRetryCount;
 
     public MediaSnapshot Snapshot => Volatile.Read(ref _snapshot);
 
@@ -71,10 +68,20 @@ internal sealed class MediaSessionService : IDisposable
     private async Task PollForMetadataChangesAsync()
     {
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        var nextArtworkRefresh = DateTimeOffset.MinValue;
         while (Volatile.Read(ref _disposed) == 0 && await timer.WaitForNextTickAsync())
         {
             var selected = Volatile.Read(ref _selected);
             if (selected is null) continue;
+            if (Snapshot.ArtworkPixels is null)
+            {
+                if (DateTimeOffset.UtcNow >= nextArtworkRefresh)
+                {
+                    nextArtworkRefresh = DateTimeOffset.UtcNow.AddSeconds(3);
+                    RequestRefresh();
+                }
+                continue;
+            }
 
             try
             {
@@ -88,22 +95,12 @@ internal sealed class MediaSessionService : IDisposable
                 var polled = MediaSnapshot.FromProperties(sourceAppId, properties.Title, properties.Artist,
                     properties.AlbumTitle, MediaPlaybackState.Unknown, null, null, 0, 0);
                 bool changed;
-                bool retryArtwork;
                 lock (_sync)
                 {
                     if (_disposed != 0 || !ReferenceEquals(_selected, selected)) continue;
                     changed = !_snapshot.HasSameMetadata(polled);
-                    if (changed || !ReferenceEquals(_artworkRetrySession, selected) ||
-                        _artworkRetryMetadata is null || !_artworkRetryMetadata.HasSameMetadata(polled))
-                    {
-                        _artworkRetrySession = selected;
-                        _artworkRetryMetadata = polled;
-                        _artworkRetryCount = 0;
-                    }
-                    retryArtwork = !changed && _snapshot.ArtworkPixels is null && _artworkRetryCount < 3;
-                    if (retryArtwork) _artworkRetryCount++;
                 }
-                if (changed || retryArtwork) RequestRefresh();
+                if (changed) RequestRefresh();
             }
             catch (Exception) { }
         }
