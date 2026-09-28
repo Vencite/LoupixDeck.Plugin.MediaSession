@@ -22,6 +22,9 @@ internal sealed class MediaSessionService : IDisposable
     private int _refreshRunning;
     private int _refreshPending;
     private long _refreshRevision;
+    private GlobalSystemMediaTransportControlsSession? _artworkRetrySession;
+    private MediaSnapshot? _artworkRetryMetadata;
+    private int _artworkRetryCount;
 
     public MediaSnapshot Snapshot => Volatile.Read(ref _snapshot);
 
@@ -85,12 +88,22 @@ internal sealed class MediaSessionService : IDisposable
                 var polled = MediaSnapshot.FromProperties(sourceAppId, properties.Title, properties.Artist,
                     properties.AlbumTitle, MediaPlaybackState.Unknown, null, null, 0, 0);
                 bool changed;
+                bool retryArtwork;
                 lock (_sync)
                 {
                     if (_disposed != 0 || !ReferenceEquals(_selected, selected)) continue;
                     changed = !_snapshot.HasSameMetadata(polled);
+                    if (changed || !ReferenceEquals(_artworkRetrySession, selected) ||
+                        _artworkRetryMetadata is null || !_artworkRetryMetadata.HasSameMetadata(polled))
+                    {
+                        _artworkRetrySession = selected;
+                        _artworkRetryMetadata = polled;
+                        _artworkRetryCount = 0;
+                    }
+                    retryArtwork = !changed && _snapshot.ArtworkPixels is null && _artworkRetryCount < 3;
+                    if (retryArtwork) _artworkRetryCount++;
                 }
-                if (changed) RequestRefresh();
+                if (changed || retryArtwork) RequestRefresh();
             }
             catch (Exception) { }
         }
@@ -235,13 +248,7 @@ internal sealed class MediaSessionService : IDisposable
         IRandomAccessStreamReference reference, string sourceAppId, string? title, string? artist,
         string? album, MediaPlaybackState playback, long revision)
     {
-        (byte[] Bytes, uint[] Pixels, int Width, int Height)? artwork = null;
-        for (var attempt = 0; attempt < 3 && IsArtworkRefreshCurrent(session, revision); attempt++)
-        {
-            if (attempt > 0) await Task.Delay(TimeSpan.FromSeconds(1));
-            artwork = await ReadArtworkAsync(session, reference, revision);
-            if (artwork is not null) break;
-        }
+        var artwork = await ReadArtworkAsync(session, reference, revision);
         if (artwork is null)
         {
             return;
