@@ -235,16 +235,15 @@ internal sealed class MediaSessionService : IDisposable
         IRandomAccessStreamReference reference, string sourceAppId, string? title, string? artist,
         string? album, MediaPlaybackState playback, long revision)
     {
-        var artwork = await ReadArtworkAsync(session, reference, revision);
+        (byte[] Bytes, uint[] Pixels, int Width, int Height)? artwork = null;
+        for (var attempt = 0; attempt < 3 && IsArtworkRefreshCurrent(session, revision); attempt++)
+        {
+            if (attempt > 0) await Task.Delay(TimeSpan.FromSeconds(1));
+            artwork = await ReadArtworkAsync(session, reference, revision);
+            if (artwork is not null) break;
+        }
         if (artwork is null)
         {
-            lock (_sync)
-            {
-                if (!IsArtworkRefreshCurrentLocked(session, revision)) return;
-                _artwork.Remove(session);
-            }
-            Publish(MediaSnapshot.FromProperties(sourceAppId, title, artist, album, playback,
-                null, null, 0, 0), session, revision);
             return;
         }
         if (!IsArtworkRefreshCurrent(session, revision)) return;
