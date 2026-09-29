@@ -1,6 +1,6 @@
 # Media Session for LoupixDeck
 
-Show the current Windows media session on a LoupixDeck touch button. Press the button to play or pause.
+Show the current Windows media session on a [LoupixDeck](https://github.com/RadiatorTwo/LoupixDeck) touch button. Press the button to play or pause.
 
 ## Features
 
@@ -35,7 +35,9 @@ ArtworkOnly layout:
 
 ## Installation
 
-No release has been published yet. To try the plugin locally, follow the build and dev deployment steps in [DEVELOPMENT.md](DEVELOPMENT.md). Once a release is available, download its ZIP from [GitHub Releases](https://github.com/Vencite/LoupixDeck.Plugin.MediaSession/releases) and install it from the LoupixDeck Plugins window.
+Download the Windows ZIP from [GitHub Releases](https://github.com/Vencite/LoupixDeck.Plugin.MediaSession/releases) and install it from the LoupixDeck Plugins window. Enable the plugin for your device, then assign Now Playing to a touch button.
+
+For local builds and dev deployment, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Use
 
