@@ -9,10 +9,28 @@ Show the current Windows media session on a LoupixDeck touch button. Press the b
 - Scroll long titles and artists in a continuous loop when enabled.
 - Assign Next and Previous commands separately if wanted.
 
+## Screenshots
+
+Now Playing tile in the button editor:
+
+![Now Playing tile showing artwork, title and artist in the LoupixDeck button editor](docs/images/now-playing-editor.png)
+
+LoupixDeck overview with the Now Playing tile active:
+
+![LoupixDeck overview with an active Now Playing tile](docs/images/now-playing-overview.png)
+
+TextOnly layout with scrolling title and artist:
+
+![Now Playing tile in TextOnly layout with scrolling title and artist](docs/images/now-playing-text-only.png)
+
+ArtworkOnly layout:
+
+![Now Playing tile in ArtworkOnly layout with artwork filling the button](docs/images/now-playing-artwork-only.png)
+
 ## Requirements
 
 - Windows 10 version 2004 or later, or Windows 11.
-- LoupixDeck using Plugin SDK 1.26.0 or later.
+- LoupixDeck 1.34.0 or later (Plugin SDK 1.26.0 or later).
 - A media source that publishes a Windows Global System Media Transport Controls session.
 
 ## Installation
@@ -42,6 +60,12 @@ Enable the matching scroll option to loop long text continuously; it does not pa
 ## Current limitations
 
 The plugin reads Windows media sessions. Spotify Desktop, Chrome, Edge and YouTube are examples of sources that may publish one; the plugin has no special Spotify, browser or YouTube integration. If an app or website does not expose its media through Windows Global System Media Transport Controls, the plugin cannot show or control it. Artwork is optional and appears only when the source publishes it.
+
+### Known Spotify artwork issue
+
+Spotify may publish the track title and artist without artwork, leaving the button with text only. We have confirmed this issue: the Windows media session returns no thumbnail, even when the track has an album cover. The plugin retries every 3 seconds while artwork is missing, but it cannot retrieve a cover that Spotify has not made available through Windows. There is currently no fix within this plugin.
+
+Workaround: skip to the previous or next track. In our testing, this made Spotify publish artwork again.
 
 ## Development
 

@@ -30,6 +30,15 @@ Treat plugin.json id, assembly name, `MediaSession.NowPlaying`, `MediaSession.Ne
 
 The release workflow calls the reusable workflow in RadiatorTwo/LoupixDeck.PluginSdk. A manual workflow_dispatch run packages an artifact without publishing. A published GitHub Release uses the tag v<plugin.json version>. The package must not include LoupixDeck.PluginSdk.dll.
 
+## First release checklist
+
+1. Run the build and smoke checks above. Confirm version `0.1.0` in plugin.json and MediaSessionPlugin.Metadata, and SDK `1.26.0` in the manifest and package reference.
+2. Run the release workflow manually on the final commit. Inspect the artifact: plugin.json, entry assembly and icon at the ZIP root, required dependencies included, no LoupixDeck.PluginSdk.dll.
+3. Install that ZIP through the Plugins window on Windows with LoupixDeck 1.34.0 or later. Check play/pause, Next, Previous, all layouts, scrolling, missing artwork, no active media session and saved bindings after restarting the host.
+4. Publish tag `v0.1.0` with the notes in RELEASE_NOTES.md. Wait for the release workflow and verify its ZIP, plugin.json and SHA256SUMS attachments.
+5. Add `mediasession` to RadiatorTwo/LoupixDeck's plugin-store.json through a pull request. Use repository `Vencite/LoupixDeck.Plugin.MediaSession`, platforms `["Windows"]`, minSdkVersion `1.26.0` and commandPrefixes `["MediaSession."]`. Copy the published workflow's store-entry.json as the release field; a manual run's entry is only a preview.
+6. After the catalogue PR is merged, verify installation from the Store and enable the plugin for the device. Future releases also need a catalogue update.
+
 ## Sources
 
 Before changing SDK usage, inspect the current plugin, relevant plugins under Vencite/LoupixDeck.Plugin.*, RadiatorTwo/LoupixDeck, RadiatorTwo/LoupixDeck.PluginSdk, then official LoupixDeck documentation/issues/PRs. Check project, manifest, command and rendering contracts against upstream source.
